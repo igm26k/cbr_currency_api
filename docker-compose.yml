@@ -1,0 +1,65 @@
+version: '2.4'
+
+services:
+
+  test_task_postgres:
+    container_name: test_task_postgres
+    build: ./docker/postgres
+    environment:
+      POSTGRES_DB: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_USER: test
+      POSTGRES_INITDB_ARGS: "-E UTF8"
+    networks:
+      platform:
+        aliases:
+          - postgres.$PROJECT_NAME
+    restart: unless-stopped
+    volumes:
+      - test-task-postgres-data:/var/lib/postgresql/data:rw
+    ports:
+      - ${TEST_TASK_POSTGRES_PORT}:5432
+
+  test_task_api:
+    container_name: test_task_api
+    build: ./docker/api
+    restart: unless-stopped
+    networks:
+      platform:
+        aliases:
+          - api.$PROJECT_NAME
+    volumes:
+      - .:/var/www/app/
+    working_dir: /var/www/app/
+    links:
+      - test_task_postgres
+    depends_on:
+      - test_task_postgres
+
+  test_task_nginx:
+    container_name: test_task_nginx
+    build: ./docker/nginx
+    restart: unless-stopped
+    ports:
+      - ${TEST_TASK_NGINX_PORT}:80
+    networks:
+      platform:
+        aliases:
+          - nginx.$PROJECT_NAME
+    volumes:
+      - ./docker/nginx/logs:/var/log/nginx/
+      - .:/var/www/app/
+    links:
+      - test_task_api
+    depends_on:
+      - test_task_api
+    environment:
+      - PROJECT_NAME=$PROJECT_NAME
+
+networks:
+  platform:
+    driver: bridge
+    name: system.$PROJECT_NAME
+
+volumes:
+  test-task-postgres-data:
