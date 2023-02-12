@@ -52,9 +52,9 @@ class CurrencyDynamic
     }
 
     /**
-     * @return string|null
+     * @return DateTime|string|null
      */
-    public function getDate(): ?string
+    public function getDate(): DateTime|string|null
     {
         return $this->Date;
     }

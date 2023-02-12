@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\CurrencyDynamic;
 use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\ResultSetMapping;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -41,31 +42,62 @@ class CurrencyDynamicRepository extends ServiceEntityRepository
         }
     }
 
-    public function findByDateAndCode($date, $code): array
+    public function findByDateAndCode($date, $code): ?array
     {
         $rsm = new ResultSetMapping();
+        $rsm->addScalarResult('date', 'date');
         $rsm->addScalarResult('value', 'val');
         $rsm->addScalarResult('diff_value', 'diff');
 
         $datetime = new DateTime($date);
-        $date2weeksAgo = $datetime->modify('-2 weeks')->format('Y-m-d');
+        $day = $datetime->format('D');
+
+        if ($day === 'Sun') {
+            $datetime->modify('-2 day');
+        }
+        elseif ($day === 'Mon') {
+            $datetime->modify('-3 day');
+        }
+        else {
+            $datetime->modify('-1 day');
+        }
+
+        $dateInPast = $datetime->format('Y-m-d');
 
         return $this->_em
             ->createNativeQuery(
                 "SELECT 
+                    date,
                     value, 
                     (lag(value, 1) over (order by id)) - value as diff_value
                 FROM currency_dynamic
-                WHERE date BETWEEN :dateFrom AND :dateTo AND currency_id = :code
+                WHERE date BETWEEN :dateFrom AND :dateTo 
+                  AND currency_id = :code
                 ORDER BY date DESC
                 LIMIT 1",
                 $rsm
             )
             ->setParameters([
-                'dateFrom' => $date2weeksAgo,
+                'dateFrom' => $dateInPast,
                 'dateTo'   => $date,
                 'code'     => $code
             ])
-            ->getArrayResult();
+            ->getOneOrNullResult();
+    }
+
+    /**
+     * @param $code
+     * @return CurrencyDynamic|null
+     * @throws NonUniqueResultException
+     */
+    public function findLastItemByCode($code)
+    {
+        return $this->createQueryBuilder('cd')
+            ->andWhere('cd.CurrencyID = :code')
+            ->setParameter('code', $code)
+            ->orderBy('cd.Date', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 }

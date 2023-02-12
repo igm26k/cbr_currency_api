@@ -5,8 +5,7 @@ namespace App\Command;
 use App\Cbr\CbrHttpClient;
 use App\Cbr\DataTransformer\XmlDataTransformer;
 use App\Entity\CurrencyCode;
-use App\Entity\CurrencyDynamic;
-use DateTime;
+use App\Service\GetCurrencyService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -45,7 +44,6 @@ class GetCurrencyDynamicCommand extends Command
 
         $io = new SymfonyStyle($input, $output);
 
-        $batchSize = 5000;
         $currentDate = date('Y-m-d');
         $client = new CbrHttpClient();
         $transformer = new XmlDataTransformer();
@@ -57,46 +55,13 @@ class GetCurrencyDynamicCommand extends Command
         foreach ($currencies as $currency) {
             $currencyCode = $currency->getID();
 
-            $currencyDynamicXml = $client->fetchCurrencyDynamic('1950-01-01', $currentDate, $currencyCode);
-            $xmlObj = $transformer->transform($currencyDynamicXml);
-            $records = $xmlObj->xpath('//Record');
-
-            $io->info('Insert currencies to table "currency_dynamic" for ' . $currencyCode);
-
-            $i = 1;
-
-            foreach ($records as $record) {
-                $currencyId = (string)$record->attributes()?->Id;
-
-                $date = (string)$record->attributes()?->Date;
-                $datetime = new DateTime($date);
-
-                $value = (float)str_replace(',', '.', $record->Value);
-
-                $currencyDynamic = new CurrencyDynamic();
-                $currencyDynamic->setCurrencyID(trim($currencyId));
-                $currencyDynamic->setDate($datetime);
-                $currencyDynamic->setValue($value);
-                $currencyDynamic->setNominal(trim($record->Nominal));
-
-                $this->entityManager->persist($currencyDynamic);
-
-                if (($i % $batchSize) === 0) {
-                    $this->entityManager->flush();
-                    $this->entityManager->clear();
-                    $i = 1;
-                    continue;
-                }
-
-                unset($currencyDynamic, $datetime, $record);
-
-                $i++;
-            }
-
-            $this->entityManager->flush();
-            $this->entityManager->clear();
-
-            unset($currencyDynamic, $currencyDynamicXml, $xmlObj, $record, $records, $datetime, $currency);
+            $getCurrencyService = new GetCurrencyService(
+                $this->entityManager,
+                $client,
+                $transformer,
+                $io
+            );
+            $getCurrencyService->getAndInsert('1950-01-01', $currentDate, $currencyCode);
         }
 
         $io->success('Successfully inserted');
