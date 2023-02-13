@@ -1,9 +1,15 @@
 # Installation
 
+Должны быть свободны порты 3001 и 3002.
+
 ```shell
-sudo apt-get update \
-  && sudo apt-get install -y docker docker-compose make \
-  && make
+sudo apt-get update && sudo apt-get install -y docker docker-compose make
+
+git clone https://github.com/igm26k/cbr_currency_api.git
+
+cd cbr_currency_api/
+
+make
 ```
 
 # API
