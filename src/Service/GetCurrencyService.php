@@ -8,6 +8,10 @@ use App\Entity\CurrencyDynamic;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class GetCurrencyService
 {
@@ -17,6 +21,12 @@ class GetCurrencyService
     private XmlDataTransformer     $transformer;
     private ?SymfonyStyle          $io;
 
+    /**
+     * @param EntityManagerInterface $entityManager
+     * @param CbrHttpClient $client
+     * @param XmlDataTransformer $transformer
+     * @param SymfonyStyle|null $io
+     */
     public function __construct(
         EntityManagerInterface $entityManager,
         CbrHttpClient          $client,
@@ -30,6 +40,16 @@ class GetCurrencyService
         $this->io = $io;
     }
 
+    /**
+     * @param $dateFrom
+     * @param $dateTo
+     * @param $currencyCode
+     * @return void
+     * @throws ClientExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     */
     public function getAndInsert($dateFrom, $dateTo, $currencyCode): void
     {
         $currencyDynamicXml = $this->client->fetchCurrencyDynamic($dateFrom, $dateTo, $currencyCode);

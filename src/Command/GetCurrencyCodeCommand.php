@@ -5,7 +5,6 @@ namespace App\Command;
 use App\Cbr\CbrHttpClient;
 use App\Cbr\DataTransformer\XmlDataTransformer;
 use App\Entity\CurrencyCode;
-use App\Repository\CurrencyCodeRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;

@@ -21,6 +21,11 @@ class CurrencyCodeRepository extends ServiceEntityRepository
         parent::__construct($registry, CurrencyCode::class);
     }
 
+    /**
+     * @param CurrencyCode $entity
+     * @param bool $flush
+     * @return void
+     */
     public function save(CurrencyCode $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
@@ -30,6 +35,11 @@ class CurrencyCodeRepository extends ServiceEntityRepository
         }
     }
 
+    /**
+     * @param CurrencyCode $entity
+     * @param bool $flush
+     * @return void
+     */
     public function remove(CurrencyCode $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
@@ -39,13 +49,9 @@ class CurrencyCodeRepository extends ServiceEntityRepository
         }
     }
 
-    public function findAllAsArray(): array|float|int|string
-    {
-        return $this->createQueryBuilder('cc')
-            ->getQuery()
-            ->getArrayResult();
-    }
-
+    /**
+     * @return float|int|mixed|string
+     */
     public function deleteAll()
     {
         return $this->createQueryBuilder('cc')

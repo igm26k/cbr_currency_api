@@ -14,13 +14,6 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class CbrHttpClient
 {
-    // https://cbr.ru/scripts/XML_val.asp?d=0 - коды валют, устанавливаемые ежедневно (обновлять каждый день в 00:00:00)
-    // https://cbr.ru/scripts/XML_val.asp?d=1 - коды валют, устанавливаемые ежемесячно (обновлять каждый месяц первого числа в 00:00:00)
-
-    // 01.07.1992 - дата первой записи котировок в cbr.ru
-    // https://cbr.ru/scripts/XML_dynamic.asp?date_req1=04/02/1988&date_req2=12/02/2023&VAL_NM_RQ=R01235
-    //          получение динамики котировок между датами
-
     const CURRENCY_CODES_URL   = 'https://cbr.ru/scripts/XML_val.asp';
     const CURRENCY_DYNAMIC_URL = 'https://cbr.ru/scripts/XML_dynamic.asp';
 
@@ -53,6 +46,17 @@ class CbrHttpClient
         return $response->getContent();
     }
 
+    /**
+     * @param string $fromDate
+     * @param string $toDate
+     * @param string $currencyCode
+     * @return string
+     * @throws ClientExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws Exception
+     */
     public function fetchCurrencyDynamic(
         string $fromDate,
         string $toDate,

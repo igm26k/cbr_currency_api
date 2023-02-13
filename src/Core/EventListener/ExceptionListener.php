@@ -11,6 +11,10 @@ use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 class ExceptionListener
 {
+    /**
+     * @param ExceptionEvent $event
+     * @return void
+     */
     public function onKernelException(ExceptionEvent $event): void
     {
         $exception = $event->getThrowable();
@@ -29,18 +33,13 @@ class ExceptionListener
         $event->setResponse($response);
     }
 
+    /**
+     * @param \Throwable $exception
+     * @return string
+     */
     public function exceptionToJson(\Throwable $exception): string
     {
         $json = ['error' => 'Internal server error'];
-
-        //if ($this->env === 'dev') {
-        $json = [
-            'error' => $exception->getMessage(),
-            'file'  => $exception->getFile(),
-            'line'  => $exception->getLine(),
-            'trace' => $exception->getTrace(),
-        ];
-        //}
 
         return json_encode($json);
     }

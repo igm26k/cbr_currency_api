@@ -9,7 +9,10 @@ use App\Form\Type\GetCurrencyType;
 use App\Repository\CurrencyDynamicRepository;
 use App\Service\GetCurrencyService;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -27,6 +30,13 @@ class GetCurrencyController extends AbstractApiController
     {
     }
 
+    /**
+     * @param Request $request
+     * @return Response
+     * @throws NonUniqueResultException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
     #[Route('/get-currency', name: 'get_currency', methods: [
         'GET',
         'POST'

@@ -19,11 +19,19 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class CurrencyDynamicRepository extends ServiceEntityRepository
 {
+    /**
+     * @param ManagerRegistry $registry
+     */
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, CurrencyDynamic::class);
     }
 
+    /**
+     * @param CurrencyDynamic $entity
+     * @param bool $flush
+     * @return void
+     */
     public function save(CurrencyDynamic $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
@@ -33,6 +41,11 @@ class CurrencyDynamicRepository extends ServiceEntityRepository
         }
     }
 
+    /**
+     * @param CurrencyDynamic $entity
+     * @param bool $flush
+     * @return void
+     */
     public function remove(CurrencyDynamic $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
@@ -42,6 +55,12 @@ class CurrencyDynamicRepository extends ServiceEntityRepository
         }
     }
 
+    /**
+     * @param $date
+     * @param $code
+     * @return array|null
+     * @throws NonUniqueResultException
+     */
     public function findByDateAndCode($date, $code): ?array
     {
         $rsm = new ResultSetMapping();
@@ -90,7 +109,7 @@ class CurrencyDynamicRepository extends ServiceEntityRepository
      * @return CurrencyDynamic|null
      * @throws NonUniqueResultException
      */
-    public function findLastItemByCode($code)
+    public function findLastItemByCode($code): ?CurrencyDynamic
     {
         return $this->createQueryBuilder('cd')
             ->andWhere('cd.CurrencyID = :code')
